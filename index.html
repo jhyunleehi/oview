@@ -111,6 +111,7 @@
             { data: { source: 'vid35', target: 'pid23' } },
         ];
 
+
         // 아래는 공식 사이트에 올라와 있는 예제 코드입니다
         let cy = cytoscape({
 
@@ -170,6 +171,14 @@
             }
         });
 
+        let thislayout=cy.layout({ 
+                name: 'fcose',
+                randomize: false,
+                animate: true, // whether to transition the node positions
+                animationDuration: 500 // duration of animation in ms if enable                
+             });
+
+
         cy.on('tap', function (e) {
             const url = e.target.data('label')
             //if (url && url !== '') { window.open(url); }
@@ -177,6 +186,7 @@
             let text = document.getElementById('textarea');
             out.setAttribute('value', url);
             text.setAttribute('value', url);
+                    thislayout.run();
         });
     </script>
     <div>
