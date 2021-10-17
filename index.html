@@ -19,16 +19,15 @@
 </head>
 
 <body>
-    <h1 class='ml-2'>SO view</h1>
+    <div><h1 class='ml-2'>SO view</h1> </div>
     <div style='width:30pxn; position: absolute;'>
         <button id='randomizebutton' class='btn'>Randomise</button>
         <div id='myside' class='sidepanel'>
             <p><input type="text" id="datasource"></p>
-            <p><textarea cols="50" rows='20' id='textarea'></textarea>
+            <p><textarea cols="20" rows='10' id='textarea'></textarea>
             </p>
         </div>
     </div>
-
     <div id="cy"></div>
     <script>
 
@@ -171,22 +170,20 @@
             }
         });
 
-        let thislayout=cy.layout({ 
-                name: 'fcose',
-                randomize: false,
-                animate: true, // whether to transition the node positions
-                animationDuration: 500 // duration of animation in ms if enable                
-             });
+        let thislayout = cy.layout({
+            name: 'fcose',
+            randomize: false,
+            animate: true, // whether to transition the node positions
+            animationDuration: 500 // duration of animation in ms if enable                
+        });
 
 
         cy.on('tap', function (e) {
             const url = e.target.data('label')
             //if (url && url !== '') { window.open(url); }
             let out = document.getElementById('datasource');
-            let text = document.getElementById('textarea');
             out.setAttribute('value', url);
-            text.setAttribute('value', url);
-                    thislayout.run();
+            thislayout.run();
         });
     </script>
     <div>
