@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node Add/Delete Example</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.21.1/cytoscape.min.js"></script>
+    <style>
+        #cy {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+        }
+        .controls {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <button id="add-btn">ADD Node</button>
+        <button id="del-btn">DEL Node</button>
+    </div>
+    <div id="cy"></div>
+
+    <script>
+        const data = [
+            { data: { id: 'so', label: 'so' } },
+            { data: { id: 'sid1', label: 'netapp1', type: 'storage', parent: 'so' } },
+            { data: { id: 'sid2', label: 'netapp2', type: 'storage', parent: 'so' } },
+            { data: { id: 'pid1', label: 'pool1', type: 'pool' } },
+            { data: { id: 'pid2', label: 'pool2', type: 'pool' } },
+            { data: { id: 'pid3', label: 'pool3', type: 'pool' } },
+            { data: { id: 'vid1', label: 'vol1', type: 'volume' } },
+            { data: { id: 'vid2', label: 'vol2', type: 'volume' } },
+            { data: { id: 'vid3', label: 'vol3', type: 'volume' } },
+            { data: { source: 'pid1', target: 'sid1' } },
+            { data: { source: 'pid2', target: 'sid1' } },
+            { data: { source: 'pid3', target: 'sid1' } },
+            { data: { source: 'vid1', target: 'pid1' } },
+            { data: { source: 'vid2', target: 'pid1' } },
+            { data: { source: 'vid3', target: 'pid1' } },
+            { data: { source: 'vid4', target: 'pid2' } },
+            { data: { source: 'vid5', target: 'pid3' } },
+        ];
+
+        let cy = cytoscape({
+            container: document.getElementById('cy'),
+            elements: data,
+            style: [
+                {
+                    selector: 'node',
+                    style: {
+                        'label': 'data(label)',
+                        'background-color': '#0074D9',
+                        'color': '#fff',
+                        'text-valign': 'center',
+                        'text-halign': 'center'
+                    }
+                },
+                {
+                    selector: 'edge',
+                    style: {
+                        'width': 2,
+                        'line-color': '#BDBDBD',
+                        'target-arrow-color': '#BDBDBD',
+                        'target-arrow-shape': 'triangle'
+                    }
+                }
+            ],
+            layout: {
+                name: 'grid'
+            }
+        });
+
+        let nodeCount = 0;
+
+        // Add node function
+        document.getElementById('add-btn').addEventListener('click', () => {
+            const newNodeId = `newNode${++nodeCount}`;
+            cy.add({
+                group: 'nodes',
+                data: { id: newNodeId, label: `Node ${nodeCount}` },
+                position: { x: Math.random() * 500, y: Math.random() * 500 }
+            });
+        });
+
+        // Delete selected node and related edges
+        document.getElementById('del-btn').addEventListener('click', () => {
+            const selectedNodes = cy.$(':selected');
+            if (selectedNodes.length > 0) {
+                selectedNodes.forEach(node => {
+                    cy.remove(node.connectedEdges()); // Remove edges connected to the node
+                    cy.remove(node); // Remove the node itself
+                });
+            } else {
+                alert('Please select a node to delete.');
+            }
+        });
+
+        // Allow node selection
+        cy.on('tap', 'node', (evt) => {
+            evt.target.select();
+        });
+    </script>
+</body>
+</html>

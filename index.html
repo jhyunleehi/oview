@@ -115,9 +115,7 @@
         let cy = cytoscape({
 
             container: document.getElementById('cy'), // container to render in
-
             elements: data,
-
             style: [ // the stylesheet for the graph
                 {
                     selector: 'node',
@@ -126,7 +124,6 @@
                         'label': 'data(label)'
                     }
                 },
-
                 {
                     selector: '[type = "storage" ]',
                     style: {
@@ -139,7 +136,7 @@
                     selector: '[type = "pool" ]',
                     style: {
                         'background-color': '#11479e',
-                        shape: 'octagon',
+                        shape: 'otagon',
                         label: 'data(label)'
                     }
                 },
@@ -177,7 +174,7 @@
             animationDuration: 500 // duration of animation in ms if enable                
         });
 
-
+        
         cy.on('tap', function (e) {
             const url = e.target.data('label')
             //if (url && url !== '') { window.open(url); }
