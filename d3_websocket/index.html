@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Graph with D3.js and WebSocket</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+    <h1>실시간 그래프</h1>
+    <svg width="800" height="600"></svg>
+
+    <script>
+        const width = 800;
+        const height = 600;
+
+        const svg = d3.select("svg");
+
+        // 기본 데이터 (노드와 링크)
+        let nodes = [
+            { id: "A" },
+            { id: "B" },
+            { id: "C" },
+            { id: "D" },
+            { id: "E" },];
+        let links = [
+            { source: "A", target: "B" },
+            { source: "A", target: "C" },
+            { source: "B", target: "D" },
+            { source: "C", target: "D" },
+            { source: "D", target: "E" },
+        ];
+
+        // force simulation
+        const simulation = d3.forceSimulation(nodes)
+            .force("link", d3.forceLink(links).id(d => d.id))
+            .force("charge", d3.forceManyBody())
+            .force("center", d3.forceCenter(width / 2, height / 2));
+
+        // 그래프에 노드와 링크 추가
+        const link = svg.selectAll(".link");
+        const node = svg.selectAll(".node");
+
+        // WebSocket 클라이언트 연결
+        const socket = new WebSocket('ws://localhost:8080');
+
+        socket.onopen = function () {
+            console.log('WebSocket 서버에 연결되었습니다.');
+        };
+
+        socket.onmessage = function (event) {
+            const data = JSON.parse(event.data);
+            if (data.type === "addNode") {
+                addNode(data.node);
+            } else if (data.type === "removeNode") {
+                removeNode(data.nodeId);
+            }
+        };
+
+        // 노드를 추가하는 함수
+        function addNode(newNode) {
+            nodes.push(newNode);
+            updateGraph();
+        }
+
+        // 노드를 삭제하는 함수
+        function removeNode(nodeId) {
+            nodes = nodes.filter(d => d.id !== nodeId);
+            links = links.filter(l => l.source.id !== nodeId && l.target.id !== nodeId);
+            updateGraph();
+        }
+
+        // 그래프를 업데이트하는 함수
+        function updateGraph() {
+            // 링크 업데이트
+            link.data(links)
+                .join("line")
+                .attr("class", "link")
+                .attr("stroke", "#999")
+                .attr("stroke-opacity", 0.6);
+
+            // 노드 업데이트
+            node.data(nodes)
+                .join("circle")
+                .attr("class", "node")
+                .attr("r", 10)
+                .attr("fill", "steelblue")
+                .call(d3.drag()
+                    .on("start", dragStarted)
+                    .on("drag", dragged)
+                    .on("end", dragEnded));
+
+            // 시뮬레이션 업데이트
+            simulation.nodes(nodes);
+            simulation.force("link").links(links);
+            simulation.alpha(1).restart();
+        }
+
+        // 노드 드래그 이벤트 핸들러
+        function dragStarted(event) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            event.subject.fx = event.subject.x;
+            event.subject.fy = event.subject.y;
+        }
+
+        function dragged(event) {
+            event.subject.fx = event.x;
+            event.subject.fy = event.y;
+        }
+
+        function dragEnded(event) {
+            if (!event.active) simulation.alphaTarget(0);
+            event.subject.fx = null;
+            event.subject.fy = null;
+        }
+
+        // 서버로 메시지 보내는 예시 (노드 추가)
+        function sendAddNode(node) {
+            socket.send(JSON.stringify({
+                type: "addNode",
+                node: node
+            }));
+        }
+
+        // 서버로 메시지 보내는 예시 (노드 삭제)
+        function sendRemoveNode(nodeId) {
+            socket.send(JSON.stringify({
+                type: "removeNode",
+                nodeId: nodeId
+            }));
+        }
+
+        // 예시 노드 추가
+        sendAddNode({ id: "1", x: Math.random() * width, y: Math.random() * height });
+        sendAddNode({ id: "2", x: Math.random() * width, y: Math.random() * height });
+        sendAddNode({ id: "3", x: Math.random() * width, y: Math.random() * height });
+
+        // 예시 노드 삭제
+        setTimeout(() => {
+            sendRemoveNode("2");
+        }, 5000);
+
+    </script>
+</body>
+
+</html>
