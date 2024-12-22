@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>D3.js Example</title>
+</head>
+
+<body>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        // D3 코드 작성
+
+        const data = [10, 20, 30, 40];
+
+        d3.select('body')
+            .selectAll('p')  // 모든 <p> 요소를 선택 (초기에는 없음)
+            .data(data)      // 데이터를 바인딩
+            .enter()         // 데이터와 연결되지 않은 요소 생성
+            .append('p')     // <p> 태그 추가
+            .text(d => `Value: ${d}`); // 데이터 기반 텍스트 추가
+
+        const scale = d3.scaleLinear().domain([0, 100]).range([0, 300]);
+
+        const axis = d3.axisBottom(scale);
+
+        const svg = d3.select('body').append('svg').attr('width', 400).attr('height', 100);
+
+        svg.append('g').attr('transform', 'translate(20,50)').call(axis);
+        svg.append('circle').attr('cx', 5).attr('cy', 5).attr('r', 40).attr('fill', 'blue');
+        svg.append('circle').attr('cx', 150).attr('cy', 50).attr('r', 40).attr('fill', 'red');
+
+        d3.selectAll('circle')
+            .on('mouseover', function () {d3.select(this).attr('fill', 'red');})
+            .on('mouseout', function () {d3.select(this).attr('fill', 'blue');});
+
+
+
+    </script>
+</body>
+
+</html>
